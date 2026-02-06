@@ -64,4 +64,8 @@ class AbilityTargetAction:
     player: PlayerTurn
     index: int = 0
 
-
+@dataclass(frozen=True)
+class AbilityTargetItemAction:
+    target_card: Card
+    player: PlayerTurn
+    index: int = 0

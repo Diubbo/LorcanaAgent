@@ -6,29 +6,63 @@ class RuleBasedController(Controller):
         super().__init__(name, print_logs)
 
     def chooseAction(self, actions, gamestate):
-        best_action = None
+        # Se esiste engine → siamo nel wrapper LorcanaState (OpenSpiel)
+        if hasattr(gamestate, "engine"):
+            real_actions = gamestate.engine.get_actions()
+            idx_mode = True
+        else:
+            # Vecchio stile → le actions passate sono già reali
+            real_actions = actions
+            idx_mode = False
+
+        best_idx = None
         best_score = float("-inf")
+        best_fn = None
 
         for fn in [
-            heuristic.mulligan_heuristic,
-            heuristic.ink_heuristic,
-            heuristic.play_heuristic,
-            heuristic.quest_heuristic,
-            heuristic.deny_lore_heuristic,
-            heuristic.tempo_push_heuristic,
-            heuristic.challenge_efficiency_heuristic,
-            heuristic.endturn_heuristic,   
+                    heuristic.mulligan_heuristic, #
+                    heuristic.ink_heuristic, #
+                    
+                    # Euristiche per GIOCARE CARTE (in competizione tra loro)
+                    heuristic.play_character_heuristic,
+                    heuristic.play_draw_card_action_heuristic,
+                    heuristic.play_ramp_action_heuristic,
+                    heuristic.play_target_damage_action_heuristic,
+                    heuristic.play_aoe_damage_action_heuristic,
+                    heuristic.play_aoe_heal_action_heuristic,
+                    heuristic.play_target_heal_action_heuristic,
+                    heuristic.play_banish_item_action_heuristic,
+                    heuristic.play_item_heuristic, #
+                    
+                    # Euristiche per AZIONI SUL CAMPO
+                    heuristic.quest_heuristic, #
+                    heuristic.deny_lore_heuristic, #
+                    heuristic.tempo_push_heuristic, #
+                    heuristic.challenge_efficiency_heuristic, #
+                    
+                    # Euristiche per ABILITÀ ATTIVABILI
+                    heuristic.healing_ability_heuristic, #
+                    heuristic.damage_ability_heuristic, #
+                    
+                    # Fallback
+                    heuristic.endturn_heuristic, #
         ]:
-            action, score = fn(actions, gamestate)
-            if action and score > best_score:
-                best_action, best_score = action, score
-                if self.print_logs:
-                    print(f"[Heuristic] {fn.__name__} -> {action} (score={score})")
+            idx, score = fn(actions, gamestate)
 
-        if best_action:
-            return best_action
+            if idx is None:
+                continue
+
+            if score > best_score:
+                best_idx, best_score = idx, score
+                best_fn = fn.__name__
+
+        if best_idx is not None:
+            chosen = real_actions[best_idx] if idx_mode else best_idx  # in old style l’euristica restituisce l’azione stessa
+            if self.print_logs:
+                print(f"[Heuristic] {best_fn} -> {chosen} (score={best_score})")
+            return chosen
 
         # fallback
         if self.print_logs:
             print("[Fallback] No heuristic matched, choosing first action")
-        return actions[0]
+        return real_actions[0] if real_actions else None

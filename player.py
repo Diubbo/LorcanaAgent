@@ -4,9 +4,10 @@ from controller import Controller
 from action import MulliganAction,InkAction,PlayCardAction,QuestAction,ChallengeAction,ChallengeTargetAction,TriggeredAbilityAction,AbilityTargetAction
 from deck import Deck
 from collections import Counter
+from game_enums import GamePhase
 from inplay_character import InPlayCharacter
 from exceptions import TwentyLore
-from decklists import CharacterCard,ItemCard
+from decklists import ActionCard, CharacterCard,ItemCard
 from inplay_card import InPlayItem
 from inplay_ability import InPlayAbility
 from ability import TriggeredAbility,GainEvasiveAbility,OnQuestAbility
@@ -50,6 +51,16 @@ class Player:
         for x in self.pending_mulligan:
             self.deck.put_card_on_bottom(x)
         self.deck.shuffle()
+    
+    def draw_top_card(self):
+        """ Draw the top card of the deck. Not drawing phase. """
+        card = self.deck.draw() #
+        if card:
+            self.hand.append(card)
+            self.controller.logMessage(f"Draw: {card}")
+        else:
+            self.controller.logMessage("Empty deck.")
+        return card
 
     def get_ink_actions(self):
         inkable_cards = set(filter(lambda x: x.inkable, self.hand))
@@ -80,7 +91,7 @@ class Player:
         for ch in self.in_play_characters:
             ch.cannot_quest_this_turn = False
     
-    def play_card_from_hand(self,card):
+    def play_card_from_hand(self,card, game):
         if card.cost > self.ready_ink:
             raise ValueError("Insufficent ink")
         self.hand.remove(card)
@@ -89,6 +100,17 @@ class Player:
             self.apply_keywords(new_char)
             self.apply_character_abilities(new_char)
             self.in_play_characters.append(new_char)
+        elif type(card) is ActionCard:
+            if card.requires_target():
+                # pending_ability go to CHOOSE_TARGET
+                game.pending_ability = card.abilities[0]  # 1 ability
+                game.pending_ability_card = card
+                game.phase = GamePhase.CHOOSE_TARGET
+            else:
+                for ab in card.abilities:
+                    if hasattr(ab, 'perform_ability'):
+                        ab.perform_ability(game, self)
+                self.discard.append(card)
         elif type(card) is ItemCard:
             new_item = InPlayItem(card)
             self.in_play_items.append(new_item)
@@ -101,9 +123,15 @@ class Player:
                     self.in_play_abilities.append(TriggeredAbilityAction(ab,card))
 
 
+
+
     def ready_characters(self):
         for x in self.in_play_characters:
             x.ready = True
+
+    def ready_items(self):
+        for item in self.in_play_items:
+            item.ready = True
 
     def ready_ink_cards(self):
         self.ready_ink += self.exerted_ink
@@ -197,11 +225,18 @@ class Player:
                 item.ready = False
                 break
 
+    def banish_item(self, item_card):
+        for item in self.in_play_items:
+            if item.card == item_card:
+                self.in_play_items.remove(item)
+                self.discard.append(item.card)
+       
 
     def get_targetable_characters(self):
         return self.in_play_characters
 
-
+    def get_targetable_items(self):
+        return self.in_play_items
 
 
 

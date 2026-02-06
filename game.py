@@ -1,8 +1,9 @@
 
 from dataclasses import dataclass
+from decklists import ActionCard
 from player import Player
 from player import create_player
-from action import MulliganAction,PassAction,FirstPlayerAction,DrawAction,InkAction,PlayCardAction,QuestAction,ChallengeAction,TriggeredAbilityAction,AbilityTargetAction
+from action import MulliganAction,PassAction,FirstPlayerAction,DrawAction,InkAction,PlayCardAction,QuestAction,ChallengeAction,TriggeredAbilityAction,AbilityTargetAction, AbilityTargetItemAction
 from controller import Controller
 from exceptions import TwentyLore
 from inplay_character import InPlayCharacter
@@ -11,6 +12,7 @@ from game_enums import GamePhase
 from game_enums import PlayerTurn
 import copy
 import random
+from ability import DamageTriggeredAbility, HealingTriggeredAbility, TargetedHealingAbility, BanishItemAbility 
 
 @dataclass
 class Game:
@@ -41,6 +43,8 @@ class Game:
         self.player = PlayerTurn.PLAYER1
         self.phase = GamePhase.DIE_ROLL
 
+        self.pending_ability = None 
+        self.pending_ability_card = None
 
     def play_game(self):
         while self.phase != GamePhase.GAME_OVER:
@@ -106,6 +110,7 @@ class Game:
                 self.phase = GamePhase.MAIN
                 self.currentPlayer.ready_characters()
                 self.currentPlayer.ready_ink_cards()
+                self.currentPlayer.ready_items() 
                 self.currentPlayer.dry_characters()
                 self.player_has_inked = False
             elif self.phase == GamePhase.CHALLENGING:
@@ -122,16 +127,49 @@ class Game:
                     self.current_challenger = None
                     self.phase = GamePhase.MAIN
             elif self.phase == GamePhase.CHOOSE_TARGET:
-                if type(act) is AbilityTargetAction:
-                    if act.player == PlayerTurn.PLAYER1:
-                        current_target = self.p1.get_character(act.target_card,act.index)
-                    else:
-                        current_target = self.p2.get_character(act.target_card,act.index)
-                    self.pending_ability.perform_ability(current_target)
-                    self.phase = GamePhase.MAIN
-                elif isinstance(act, PassAction):
-                    # no valid target → cancel ability
-                    self.pending_ability = None
+                    # --- Caso 1: Bersaglio è un PERSONAGGIO ---
+                    if type(act) is AbilityTargetAction:
+                        current_owner = None 
+                        current_target = None
+                        if act.player == PlayerTurn.PLAYER1:
+                            # Usiamo l'indice per ottenere il personaggio corretto
+                            current_target = self.p1.get_targetable_characters()[act.index]
+                            current_owner = self.p1 
+                        else:
+                            current_target = self.p2.get_targetable_characters()[act.index]
+                            current_owner = self.p2
+
+                        self.pending_ability.perform_ability(current_target, current_owner)
+
+                    # --- Caso 2: Bersaglio è un OGGETTO ---
+                    elif type(act) is AbilityTargetItemAction:
+                        current_owner = None
+                        current_target_item = None
+                        if act.player == PlayerTurn.PLAYER1:
+                            current_target_item = self.p1.get_targetable_items()[act.index]
+                            current_owner = self.p1
+                        else:
+                            current_target_item = self.p2.get_targetable_items()[act.index]
+                            current_owner = self.p2
+
+                        # Passiamo l'oggetto e il suo proprietario
+                        self.pending_ability.perform_ability(current_target_item, current_owner)
+
+                    # --- Caso 3: Passa / Annulla ---
+                    elif isinstance(act, PassAction):
+                        self.pending_ability = None
+                        self.phase = GamePhase.MAIN
+                        return # Esci per non eseguire la logica di scarto
+
+                    # Se l'abilità proveniva da una ActionCard, scartala
+                    if isinstance(self.pending_ability_card, ActionCard):
+                        self.currentPlayer.discard.append(self.pending_ability_card)
+                    # Se era un Item, esegui la logica di banish 
+                    elif getattr(self.pending_ability, "needs_to_banish", False): 
+                        self.currentPlayer.banish_item(self.pending_ability_card)
+
+                    self.pending_ability = None 
+                    self.pending_ability_card = None
                     self.phase = GamePhase.MAIN
         except TwentyLore as tl:
             self.phase = GamePhase.GAME_OVER
@@ -151,7 +189,7 @@ class Game:
         elif type(act) is PlayCardAction:
             your_name = self.currentPlayer.controller.name
             self.log_both_players(f'{your_name} played {act.card} from hand')
-            self.currentPlayer.play_card_from_hand(act.card)
+            self.currentPlayer.play_card_from_hand(act.card, self)
                 
         elif type(act) is PassAction:
             # Do end of turn stuff and start over turn stuff
@@ -179,6 +217,7 @@ class Game:
             self.phase = GamePhase.CHALLENGING
         elif type(act) is TriggeredAbilityAction:
             self.pending_ability = act.ability
+            self.pending_ability_card = act.card
             self.phase = GamePhase.CHOOSE_TARGET
             self.currentPlayer.exert_item(act.card)
 
@@ -254,18 +293,37 @@ class Game:
                 return [PassAction()]
             return actions        
         elif self.phase == GamePhase.CHOOSE_TARGET:
-            p1_characters = self.p1.get_targetable_characters()
-            p1_actions = list(map(lambda x: AbilityTargetAction(x.card,\
-                                PlayerTurn.PLAYER1),p1_characters))
-            p2_characters = self.p2.get_targetable_characters()
-            p2_actions = list(map(lambda x: AbilityTargetAction(x.card,\
-                                PlayerTurn.PLAYER2),p2_characters))
-            actions = p1_actions + p2_actions
+            actions = []
+            ability = self.pending_ability
+
+            # Caso 1: L'abilità bersaglia PERSONAGGI
+            if isinstance(ability, (DamageTriggeredAbility, TargetedHealingAbility, HealingTriggeredAbility)):
+                p1_characters = self.p1.get_targetable_characters()
+                p1_actions = [AbilityTargetAction(x.card, PlayerTurn.PLAYER1, i) 
+                            for i, x in enumerate(p1_characters)] # Aggiunto 'i' per l'indice
+
+                p2_characters = self.p2.get_targetable_characters()
+                p2_actions = [AbilityTargetAction(x.card, PlayerTurn.PLAYER2, i)
+                            for i, x in enumerate(p2_characters)] # Aggiunto 'i' per l'indice
+
+                actions = p1_actions + p2_actions
+
+            # Caso 2: L'abilità bersaglia OGGETTI
+            elif isinstance(ability, BanishItemAbility):
+                p1_items = self.p1.get_targetable_items()
+                p1_actions = [AbilityTargetItemAction(x.card, PlayerTurn.PLAYER1, i)
+                            for i, x in enumerate(p1_items)]
+
+                p2_items = self.p2.get_targetable_items()
+                p2_actions = [AbilityTargetItemAction(x.card, PlayerTurn.PLAYER2, i)
+                            for i, x in enumerate(p2_items)]
+
+                actions = p1_actions + p2_actions
+
             if not actions:
                 return [PassAction()]
             return actions
         return [PassAction()]
-
     # To delete: not used anymore
     def clone_and_apply(self, action):
         clone = copy.deepcopy(self)

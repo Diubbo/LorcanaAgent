@@ -7,14 +7,15 @@ from agents import make_agent
 from wrapper_state import LorcanaGame
 from decklists import amber_amethyst, sapphire_steel
 
-lorcana_game = LorcanaGame(sapphire_steel, sapphire_steel)
-# mtcs minimax random at the moment
+lorcana_game = LorcanaGame(amber_amethyst, sapphire_steel)
+# mcts minimax random at the moment
 bot1 = make_agent("mcts", lorcana_game, seed=42)
 bot2 = make_agent("minimax", lorcana_game, seed=43)
+"""
 
 state = lorcana_game.new_initial_state()
 turn = 0
-"""
+
 while not state.is_terminal():
     current_bot = bot1 if state.current_player() == 0 else bot2
     action = current_bot.step(state)
