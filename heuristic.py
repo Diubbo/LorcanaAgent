@@ -240,16 +240,13 @@ def avoid_ink_evasion_heuristic(actions, gamestate):
     ]
     if not inks:
         return None
-    # not ink cards with evasion or utility abilities
     def score(a):
         c = a.card
         if isinstance(c, CharacterCard):
-            utility = getattr(c, "utility", False)
-            evasive = getattr(c, "evasion", False) or getattr(c, "bodyguard", False)
-            return (c.lore * 3 + (1 if utility else 0) + (2 if evasive else 0), c.cost)
+            evasive = "Evasive" in c.keywords or "Bodyguard" in c.keywords
+            return (c.lore * 3 + (2 if evasive else 0), c.cost)
         else:
-            #stock val for item
-            return (3,c.cost)
+            return (3, c.cost)
     best_idx, best_action = min(inks, key=lambda x: score(x[1]))
     return best_idx, score(best_action)
 

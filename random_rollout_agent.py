@@ -1,4 +1,4 @@
-from algorithms import mcts
+from open_spiel.python.algorithms import mcts
 import numpy as np
 
 class RandomRolloutAgent:

@@ -16,8 +16,8 @@ from ability import DamageTriggeredAbility, HealingTriggeredAbility, TargetedHea
 
 @dataclass
 class Game:
-    pl: Player
-    pl: Player
+    p1: Player
+    p2: Player
     currentPlayer: Player
     currentOpponent: Player
     phase: GamePhase
@@ -29,7 +29,7 @@ class Game:
     current_challenger: InPlayCharacter = None
     winner: PlayerTurn = PlayerTurn.PLAYER1
     pending_ability: InPlayAbility = None
-    turn: int = 0 # add to track number of turns 
+    turn: int = 0
 
     def __init__(self, contestant1, contestant2, environment):
         self.environment = environment
@@ -157,9 +157,14 @@ class Game:
 
                     # --- Caso 3: Passa / Annulla ---
                     elif isinstance(act, PassAction):
+                        if isinstance(self.pending_ability_card, ActionCard):
+                            self.currentPlayer.discard.append(self.pending_ability_card)
+                        else:
+                            self.currentPlayer.ready_item(self.pending_ability_card)
                         self.pending_ability = None
+                        self.pending_ability_card = None
                         self.phase = GamePhase.MAIN
-                        return # Esci per non eseguire la logica di scarto
+                        return
 
                     # Se l'abilità proveniva da una ActionCard, scartala
                     if isinstance(self.pending_ability_card, ActionCard):

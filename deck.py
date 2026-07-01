@@ -24,6 +24,9 @@ class Deck:
     def get_total_cards(self):
         return len(self.cards)
 
+    def clear(self):
+        self.cards = []
+
     def get_card_choices(self):
         result = {}
         for c in self.cards:

@@ -3,7 +3,6 @@ from open_spiel.python.algorithms import mcts
 import numpy as np
 from heuristic_eval import HeuristicEvaluator
 from minimax_agent import MinimaxAgent
-from open_spiel.python.algorithms import cfr
 from heuristic import combined_heuristic, static_state_evaluation_heuristic
 
 class UniformRandomAgent:

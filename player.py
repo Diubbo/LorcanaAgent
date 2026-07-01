@@ -138,13 +138,12 @@ class Player:
         self.exerted_ink = 0
 
     def get_questable_cards(self):
-        ready_and_dry = filter(lambda x: x.ready and x.dry and not x.cannot_quest_this_turn, self.in_play_characters)
-        descriptors = map(lambda x: x.get_descriptor(), ready_and_dry)
-        card_counts=Counter()
-        quest_actions=[]
-        for x in set(descriptors):
-            card_counts[x[0]] += 1
-            quest_actions.append(QuestAction(x[0], card_counts[x[0]]-1))
+        ready_and_dry = [x for x in self.in_play_characters if x.ready and x.dry and not x.cannot_quest_this_turn]
+        card_counts = Counter()
+        quest_actions = []
+        for ch in ready_and_dry:
+            quest_actions.append(QuestAction(ch.card, card_counts[ch.card]))
+            card_counts[ch.card] += 1
         return quest_actions
 
     def perform_on_quest_ability(self, game, in_play_character):
@@ -167,15 +166,14 @@ class Player:
                             or (not x.ready and include_evasive), self.in_play_characters))
 
     def get_challenger_choices(self, game, evasive_only):
-        ready_and_dry = filter(lambda x: x.ready and x.dry, self.in_play_characters)
+        ready_and_dry = [x for x in self.in_play_characters if x.ready and x.dry]
         if evasive_only:
-            ready_and_dry = filter(lambda x: x.has_evasive(game), ready_and_dry)
-        descriptors = map(lambda x: x.get_descriptor(), ready_and_dry)
-        card_counts=Counter()
-        challenge_actions=[]
-        for x in set(descriptors):
-            card_counts[x[0]] += 1
-            challenge_actions.append(ChallengeAction(x[0], card_counts[x[0]]-1))
+            ready_and_dry = [x for x in ready_and_dry if x.has_evasive(game)]
+        card_counts = Counter()
+        challenge_actions = []
+        for ch in ready_and_dry:
+            challenge_actions.append(ChallengeAction(ch.card, card_counts[ch.card]))
+            card_counts[ch.card] += 1
         return challenge_actions
 
     def get_challenge_targets(self, game, non_evasive_only):
@@ -223,6 +221,12 @@ class Player:
         for item in self.in_play_items:
             if item.card == item_card and item.ready:
                 item.ready = False
+                break
+
+    def ready_item(self, item_card):
+        for item in self.in_play_items:
+            if item.card == item_card and not item.ready:
+                item.ready = True
                 break
 
     def banish_item(self, item_card):

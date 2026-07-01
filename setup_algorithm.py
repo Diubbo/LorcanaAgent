@@ -1,11 +1,7 @@
 
-import pyspiel
 from wrapper_state import LorcanaGame
 from decklists import amber_amethyst, sapphire_steel
-
 from agents import make_agent
-from wrapper_state import LorcanaGame
-from decklists import amber_amethyst, sapphire_steel
 
 lorcana_game = LorcanaGame(amber_amethyst, sapphire_steel)
 # mcts minimax random at the moment

@@ -229,7 +229,7 @@ except Exception: # Fallback
 fonts = (font, font_small, font_damage)
 
 # Load card images from local folder 
-images = load_card_images("/Users/diub/PycharmProjects/lorcanaAiProject/lorcana/assets")
+images = load_card_images("assets")
 
 # Crea un'immagine di default se manca
 if "default" not in images:
