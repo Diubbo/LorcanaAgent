@@ -56,7 +56,7 @@ class GameGenerator:
         p1_cards_to_play = p1_cards.copy()
         p2_cards_to_play = p2_cards.copy()
 
-        while len(p1_cards_to_play) > 0 or len(p2_cards_to_play) > 0 and minimum_ink > self.game.p1.ready_ink or minimum_ink > self.game.p2.ready_ink:
+        while (len(p1_cards_to_play) > 0 or len(p2_cards_to_play) > 0) and (minimum_ink > self.game.p1.ready_ink or minimum_ink > self.game.p2.ready_ink):
             #p1 ink
             for a in self.game.get_actions():
                 if isinstance(a, InkAction) and a.card not in p1_cards_to_play:

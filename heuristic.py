@@ -239,7 +239,7 @@ def avoid_ink_evasion_heuristic(actions, gamestate):
         if isinstance(act, InkAction)
     ]
     if not inks:
-        return None
+        return None, 0.0
     def score(a):
         c = a.card
         if isinstance(c, CharacterCard):

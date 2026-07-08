@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
-from lorcana.contestant import Contestant
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from contestant import Contestant
 from decklists import amber_amethyst,sapphire_steel,olaf,pascal,moana,mickey_mouse,captain_hook,maleficent,scar_blue,wardrobe,dinglehopper,stitch
 from controller import RandomController,Controller
 from game import Game,GamePhase,PlayerTurn
@@ -17,7 +18,7 @@ class TestStartingHand(unittest.TestCase):
         game.phase = GamePhase.DRAW_STARTING_HAND
 
         actions = game.get_actions()
-        self.assertEqual(29, len(actions))
+        self.assertEqual(28, len(actions))
         self.assertTrue(all(type(x) is DrawAction for x in actions))
         # chance to draw olaf is 3 out of 60
         olaf_draw_action = DrawAction(olaf,3)
@@ -32,10 +33,10 @@ class TestStartingHand(unittest.TestCase):
         olaf_draw_action = DrawAction(olaf,3)
         game.process_action(olaf_draw_action)
 
-        # still 29 cards we can draw, but 1 less olaf
+        # still 28 cards we can draw, but 1 less olaf
         actions = game.get_actions()
-        self.assertEqual(29, len(actions))
-        self.assertEqual(sum(1 for _ in 
+        self.assertEqual(28, len(actions))
+        self.assertEqual(sum(1 for _ in
                 filter(lambda x: x.card == olaf,actions)),1)    #ensure only 1 olaf draw action
         # we can only draw 2 olafs now
         olaf_draw_action = DrawAction(olaf,2)
@@ -81,7 +82,7 @@ class TestStartingHand(unittest.TestCase):
         game.currentPlayer = game.p2
 
         actions = game.get_actions()
-        self.assertEqual(29, len(actions))
+        self.assertEqual(28, len(actions))
         self.assertTrue(all(type(x) is DrawAction for x in actions))
         # chance to draw hook is 3 out of 60
         hook_draw_action = DrawAction(captain_hook,3)
@@ -98,10 +99,10 @@ class TestStartingHand(unittest.TestCase):
         hook_draw_action = DrawAction(captain_hook,3)
         game.process_action(hook_draw_action)
 
-        # still 29 cards we can draw, but 1 less olaf
+        # still 28 cards we can draw, but 1 less captain hook
         actions = game.get_actions()
-        self.assertEqual(29, len(actions))
-        self.assertEqual(sum(1 for _ in 
+        self.assertEqual(28, len(actions))
+        self.assertEqual(sum(1 for _ in
                 filter(lambda x: x.card == captain_hook,actions)),1)    #ensure only 1 captain hook draw action
         # we can only draw 2 captain hooks now
         hook_draw_action = DrawAction(captain_hook,2)

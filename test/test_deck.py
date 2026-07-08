@@ -1,7 +1,8 @@
 #!/usr/bin/python3
+import os
 import sys
 import unittest
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from deck import Deck
 from decklists import amber_amethyst,moana
 

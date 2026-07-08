@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from game import Game
-from lorcana.contestant import create_contestant
+from contestant import create_contestant
 from controller import RandomController
 
 def print_stats(deck):

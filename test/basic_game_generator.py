@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from lorcana.contestant import Contestant
+from contestant import Contestant
 from decklists import amber_amethyst,sapphire_steel
 from controller import RandomController,Controller
 from game import Game,GamePhase,PlayerTurn

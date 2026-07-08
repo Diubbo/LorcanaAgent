@@ -1,9 +1,11 @@
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
-from lorcana.contestant import Contestant
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from contestant import Contestant
 from decklists import amber_amethyst,sapphire_steel
 from controller import RandomController,Controller
 from game import Game,GamePhase,PlayerTurn
+from action import FirstPlayerAction,DrawAction
 from decklists import olaf,pascal,hades,part_of_your_world,rafiki
 from decklists import captain_hook,flounder,one_jump_ahead,fire_the_cannons,mickey_mouse_true_friend,kristoff
 from inplay_character import InPlayCharacter

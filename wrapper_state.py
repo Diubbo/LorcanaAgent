@@ -23,11 +23,8 @@ class LorcanaState(pyspiel.State):
     def legal_actions(self, player: int = None) -> list[int]:
         actions = self.engine.get_actions()
         if not actions and not self.is_terminal():
-
-
-        # fallback 
+            # apply_action(0) has a phase-based fallback for empty action lists
             return [0]
-        result = list(range(len(actions)))
         return list(range(len(actions)))
 
 
