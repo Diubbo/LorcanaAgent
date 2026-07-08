@@ -67,9 +67,9 @@ class TestAvoidInkEvasionHeuristic(unittest.TestCase):
         game = make_main_game([hades])
         state = FakeState(game)
         actions = list(range(len(game.get_actions())))
-        result = avoid_ink_evasion_heuristic(actions, state)
-        # function returns bare None when inks list is empty
-        self.assertIsNone(result)
+        idx, score = avoid_ink_evasion_heuristic(actions, state)
+        self.assertIsNone(idx)
+        self.assertEqual(0.0, score)
 
     def test_evasive_keyword_detection_is_case_sensitive(self):
         # "Evasive" (capital E) must match — verify jetsam is detected correctly

@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
-from lorcanaAiProject.lorcana.test.test_support import main_state_with_half_inkables_game
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from test_support import main_state_with_half_inkables_game
 from action import InkAction
 from decklists import olaf,pascal
 

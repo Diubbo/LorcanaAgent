@@ -1,16 +1,17 @@
 #!/usr/bin/python3
 
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
-from lorcana.contestant import Contestant
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from contestant import Contestant
 from decklists import amber_amethyst,sapphire_steel
 from decklists import olaf,pascal,moana,mickey_mouse,wardrobe,dinglehopper,stitch,friends_on_the_other_side
 from decklists import captain_hook,maleficent,simba,scar_blue,one_jump_ahead,kristoff,flounder,fire_the_cannons
 from controller import RandomController
 from game import Game,GamePhase,PlayerTurn
 from action import PassAction,MulliganAction,DrawAction
-from lorcanaAiProject.lorcana.test.test_support import simple_test_game
+from test_support import simple_test_game
 
 def mulligan_state_with_different_cards_game(player):
     g = simple_test_game()

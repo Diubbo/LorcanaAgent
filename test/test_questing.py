@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from test_support import main_state_with_some_characters_in_play
 from action import InkAction,PlayCardAction,PassAction,DrawAction,QuestAction
 from decklists import olaf,pascal,CharacterCard,captain_hook,rafiki

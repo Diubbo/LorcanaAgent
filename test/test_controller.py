@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 
-import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
-from lorcana.contestant import Contestant
+import unittest
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from contestant import Contestant
 from controller import RandomController,Controller
 from game import Game,GamePhase,PlayerTurn
 from action import FirstPlayerAction,PassAction,DrawAction,MulliganAction
 from decklists import captain_hook,aurora, maleficent,olaf,pascal,wardrobe,fire_the_cannons,dinglehopper
-from lorcanaAiProject.lorcana.test.test_support import test_contestants
+from test_support import test_contestants
 
 def game_with_starting_hands(swapped):
     c = test_contestants()
@@ -173,7 +174,7 @@ class TestController(unittest.TestCase):
         self.assertEqual('test2', game.currentPlayer.controller.name)
         self.assertEqual('test2', game.currentController.name)
 
-    def test_pass_first_turn(self):
+    def test_pass_first_turn_swapped(self):
         game = game_first_turn(True)
 
         self.assertEqual(GamePhase.MAIN, game.phase)

@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
-from lorcana.test.game_generator import GameGenerator
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from game_generator import GameGenerator
 from action import PlayCardAction,TriggeredAbilityAction,AbilityTargetAction,QuestAction,ChallengeAction,ChallengeTargetAction
 from ability import HealingTriggeredAbility
 from decklists import dinglehopper,olaf,captain_hook,flounder,amber_amethyst,sapphire_steel,jetsam,ruby_emerald,pongo,pascal,moana,ariel,magic_broom

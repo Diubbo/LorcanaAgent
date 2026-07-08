@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from dinglehopper_game_generator import DinglehopperGameGenerator
 from action import PlayCardAction,TriggeredAbilityAction,AbilityTargetAction
 from ability import HealingTriggeredAbility

@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
-from lorcana.test.basic_game_generator import BasicGameGenerator
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from basic_game_generator import BasicGameGenerator
 from decklists import olaf
 from action import InkAction
 

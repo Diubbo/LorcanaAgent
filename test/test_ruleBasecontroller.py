@@ -1,11 +1,12 @@
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from controller import RandomController
 from RuleBasedController import RuleBasedController
 from state_extractor import extract_game_state
 from game import Game, GamePhase
-from lorcana.contestant import Contestant
+from contestant import Contestant
 from deck import Deck
 from decklists import amber_amethyst,sapphire_steel
 

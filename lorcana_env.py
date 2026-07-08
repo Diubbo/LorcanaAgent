@@ -1,5 +1,7 @@
 from game import Game
 from game_enums import GamePhase
+from contestant import Contestant
+from controller import EnvironmentController
 
 class LorcanaEnv:
     def __init__(self, controller1, controller2, deck1, deck2):
@@ -9,7 +11,11 @@ class LorcanaEnv:
         self.deck2 = deck2
 
     def reset(self):
-        self.game = Game(self.controller1, self.controller2, self.controller1)
+        self.game = Game(
+            Contestant(self.deck1, self.controller1),
+            Contestant(self.deck2, self.controller2),
+            EnvironmentController(),
+        )
         return self._get_obs()
 
     def step(self, action):

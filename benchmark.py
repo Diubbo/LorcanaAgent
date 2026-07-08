@@ -24,7 +24,7 @@ def create_specific_agent(agent_type_str, game):
     seed = random.randint(0, 1000000)
 
     # Use make_agent for standard agent types
-    if agent_type_str in ["mcts", "minimax", "random"]:
+    if agent_type_str in ["mcts", "minimax", "random", "rulebased"]:
          # Uses the parameters defined within make_agent (e.g., simulations, depth)
          return make_agent(agent_type_str, game, seed=seed) #
 

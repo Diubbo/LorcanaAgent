@@ -1,6 +1,7 @@
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from decklists import ActionCard
 from ability import DamageTriggeredAbility
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import sys
 from game import Game
-from lorcana.contestant import Contestant
+from contestant import Contestant
 from controller import RandomController, EnvironmentController
 from deck import Deck
 from decklists import (

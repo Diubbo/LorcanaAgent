@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 import unittest
+import os
 import sys
-sys.path.insert(1, '/Users/diub/PycharmProjects/lorcanaAiProject/lorcana')
-from lorcana.contestant import Contestant
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from contestant import Contestant
 from controller import RandomController,Controller
 from game import Game,GamePhase,PlayerTurn
 from action import FirstPlayerAction,PassAction

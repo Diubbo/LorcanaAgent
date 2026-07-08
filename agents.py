@@ -4,6 +4,7 @@ import numpy as np
 from heuristic_eval import HeuristicEvaluator
 from minimax_agent import MinimaxAgent
 from heuristic import combined_heuristic, static_state_evaluation_heuristic
+from RuleBasedController import RuleBasedController
 
 class UniformRandomAgent:
     def __init__(self, seed=None):
@@ -12,19 +13,35 @@ class UniformRandomAgent:
     def step(self, state):
         legal_actions = state.legal_actions()
         if not legal_actions:
-            return 0 
-        
+            return 0
+
         # Sceglie un indice a caso dalla lista di azioni legali
         action_index = self.rng.choice(legal_actions)
         return action_index
-    
+
+
+class RuleBasedAgent:
+    def __init__(self, name="rulebased"):
+        self._controller = RuleBasedController(name)
+
+    def step(self, state):
+        legal = state.legal_actions()
+        if not legal:
+            return 0
+        chosen = self._controller.chooseAction(legal, state)
+        if chosen is None:
+            return legal[0]
+        real_actions = state.engine.get_actions()
+        return real_actions.index(chosen)
+
+
 def minimax_eval_wrapper(state, player_id):
     score = static_state_evaluation_heuristic(state, player_id)
     return score
 
 def make_agent(agent_type, game, seed=42):
     if agent_type == "mcts":
-        eval_fn = HeuristicEvaluator() 
+        eval_fn = HeuristicEvaluator()
         return mcts.MCTSBot(
             game=game,
             uct_c=1.0,
@@ -37,5 +54,7 @@ def make_agent(agent_type, game, seed=42):
         return MinimaxAgent(depth=2, eval_fn=minimax_eval_wrapper)
     elif agent_type == "random":
         return UniformRandomAgent(seed=seed)
+    elif agent_type == "rulebased":
+        return RuleBasedAgent()
     else:
         raise ValueError(f"Unknown agent type: {agent_type}")
